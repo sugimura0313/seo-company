@@ -54,9 +54,11 @@
 ### 毎朝の記事生成フロー（自動）
 1. `tasks/keyword-queue.md` から未着手KWを1つ取得
 2. 柱（MEO/士業/補助金）を判定して対応フォルダに保存
-3. 3,000字以上・YAMLフロントマター付きで執筆
-4. git commit & push
-5. 社長がGitHubで確認 → WordPressに貼り付けて公開
+3. 3,000字以上・YAMLフロントマター付きで執筆（E-E-A-T必須ルール遵守）
+4. `articles/draft/[カテゴリ]/[KWスラッグ]-[YYYY-MM-DD].md` に保存
+5. `bash scripts/post-to-wp.sh [記事ファイルパス]` を実行してWordPressに下書き投稿
+6. git commit & push（投稿済みステータスも含む）
+7. 社長がWP管理画面で確認 → 「公開」ボタンを押すだけ
 
 ### 月次KPIレビューフロー
 1. 毎月1日に `kpi/monthly-kpi.md` を更新
