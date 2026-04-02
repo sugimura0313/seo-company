@@ -3,8 +3,8 @@ title: Googleビジネスプロフィール最適化の方法【2026年最新】
 keyword: Googleビジネスプロフィール 最適化 方法
 meta_description: Googleビジネスプロフィール（旧Googleマイビジネス）の最適化方法を7ステップで解説。飲食店・美容室・整骨院など地域ビジネスがGoogleマップで上位表示されるための具体的な手順と注意点をまとめました。
 created: 2026-04-02
-status: draft
----
+status: wp-posted
+wp_post_id: 461---
 
 # Googleビジネスプロフィール最適化の方法【2026年最新】集客に直結する7つのステップ
 
