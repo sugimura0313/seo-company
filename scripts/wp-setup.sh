@@ -37,6 +37,7 @@ $WP_CLI plugin install wp-fastest-cache --activate 2>/dev/null
 $WP_CLI plugin install contact-form-7 --activate 2>/dev/null
 $WP_CLI plugin install really-simple-ssl --activate 2>/dev/null
 $WP_CLI plugin install shortpixel-image-optimiser --activate 2>/dev/null
+$WP_CLI plugin install xo-security --activate 2>/dev/null
 echo 'done'
 "
 
@@ -62,7 +63,16 @@ echo 'done'
 "
 
 echo "=== セットアップ完了: https://$DOMAIN ==="
-echo "次のステップ:"
-echo "  1. https://$DOMAIN/wp-admin でRank Math初期設定"
-echo "  2. SSL確認"
-echo "  3. お問い合わせページ作成"
+echo ""
+echo "【手動設定が必要な項目】"
+echo "  1. XO Security: ログインURLをランダム文字列に変更、CAPTCHAをひらがなに設定"
+echo "     → https://$DOMAIN/wp-admin/options-general.php?page=xo-security"
+echo "  2. Rank Math: 初期ウィザードを完了、サイトマップ有効化"
+echo "     → https://$DOMAIN/wp-admin/admin.php?page=rank-math"
+echo "  3. GTM: コンテナ作成 → head/bodyタグをfunctions.phpに追加（手動）"
+echo "  4. GTM内でGA4タグを設定"
+echo "  5. Google Search Console: サイト登録・サイトマップ送信"
+echo "     → https://search.google.com/search-console"
+echo "  5. Really Simple SSL: SSL有効化確認"
+echo "  6. お問い合わせページ作成（CF7フォーム埋め込み）"
+echo "  7. カテゴリ作成: サイトの3本柱に合わせたカテゴリ"

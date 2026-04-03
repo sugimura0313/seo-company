@@ -21,7 +21,11 @@ fi
 TITLE=$(grep '^title:' "$MD_FILE" | head -1 | sed 's/^title: *//')
 META_DESC=$(grep '^meta_description:' "$MD_FILE" | head -1 | sed 's/^meta_description: *//')
 KEYWORD=$(grep '^keyword:' "$MD_FILE" | head -1 | sed 's/^keyword: *//')
+TAGS=$(grep '^tags:' "$MD_FILE" | head -1 | sed 's/^tags: *//')
 STATUS=$(grep '^status:' "$MD_FILE" | head -1 | sed 's/^status: *//')
+
+# ファイル名から投稿スラッグを生成（日付部分を除去）
+SLUG=$(basename "$MD_FILE" .md | sed 's/-[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}$//')
 
 # すでに投稿済みならスキップ
 if [ "$STATUS" = "wp-posted" ]; then
@@ -29,10 +33,18 @@ if [ "$STATUS" = "wp-posted" ]; then
   exit 0
 fi
 
-# 本文を取得（フロントマター除去）
-CONTENT=$(awk '/^---/{c++;if(c==2){found=1;next}} found{print}' "$MD_FILE")
-
 echo "投稿中: $TITLE"
+
+# MarkdownをGutenbergブロック形式に変換
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+GUTENBERG_FILE=$(mktemp /tmp/wp_gutenberg_XXXXXX.html)
+python3 "$SCRIPT_DIR/md_to_gutenberg.py" "$MD_FILE" > "$GUTENBERG_FILE"
+
+if [ ! -s "$GUTENBERG_FILE" ]; then
+  echo "エラー: Gutenberg変換に失敗しました"
+  rm "$GUTENBERG_FILE"
+  exit 1
+fi
 
 # 記事をWP-CLI経由でサーバーに投稿
 POST_ID=$(ssh sakura-chiiki "$WP_CLI post create \
@@ -43,23 +55,38 @@ POST_ID=$(ssh sakura-chiiki "$WP_CLI post create \
 
 if [ -z "$POST_ID" ]; then
   echo "エラー: 投稿に失敗しました"
+  rm "$GUTENBERG_FILE"
   exit 1
 fi
 
-# 本文をアップロードして更新
-CONTENT_FILE=$(mktemp)
-echo "$CONTENT" > "$CONTENT_FILE"
-scp -q "$CONTENT_FILE" sakura-chiiki:/tmp/wp_post_content.md
+# Gutenberg HTMLをサーバーにアップロード
+scp -q "$GUTENBERG_FILE" sakura-chiiki:/tmp/wp_gutenberg_content.html
+rm "$GUTENBERG_FILE"
+
+# PHPスクリプトを生成してアップロード（特殊文字を安全に処理）
+PHP_FILE=$(mktemp /tmp/wp_update_XXXXXX.php)
+cat > "$PHP_FILE" <<PHPEOF
+<?php
+\$post_id = $POST_ID;
+\$content = file_get_contents('/tmp/wp_gutenberg_content.html');
+wp_update_post(['ID' => \$post_id, 'post_content' => \$content, 'post_name' => '$SLUG']);
+update_post_meta(\$post_id, '_aioseo_description', '$META_DESC');
+update_post_meta(\$post_id, '_aioseo_keywords', '$KEYWORD');
+// タグを設定
+\$tags = '$TAGS';
+if (\$tags) {
+    \$tag_names = array_map('trim', explode(',', \$tags));
+    wp_set_post_tags(\$post_id, \$tag_names, false);
+}
+echo 'updated: ' . strlen(\$content) . ' bytes';
+PHPEOF
+scp -q "$PHP_FILE" sakura-chiiki:/tmp/wp_update_post.php
+rm "$PHP_FILE"
 
 ssh sakura-chiiki "
-CONTENT=\$(cat /tmp/wp_post_content.md)
-$WP_CLI post update $POST_ID --post_content=\"\$CONTENT\"
-$WP_CLI post meta update $POST_ID rank_math_description '$META_DESC'
-$WP_CLI post meta update $POST_ID rank_math_focus_keyword '$KEYWORD'
-rm /tmp/wp_post_content.md
+$WP_CLI eval-file /tmp/wp_update_post.php
+rm /tmp/wp_gutenberg_content.html /tmp/wp_update_post.php
 " 2>/dev/null
-
-rm "$CONTENT_FILE"
 
 echo "✅ WP下書き投稿完了!"
 echo "   投稿ID: $POST_ID"
