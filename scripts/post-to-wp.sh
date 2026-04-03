@@ -6,6 +6,25 @@
 MD_FILE=$1
 WP_PATH="/home/yuzu0313/www/chiiki-dx.net"
 WP_CLI="php ~/wp-cli.phar --path=$WP_PATH"
+NOTIFY_EMAIL="sugimuraeiji32@gmail.com"
+
+# エラー通知関数
+notify_error() {
+  local MESSAGE=$1
+  local SUBJECT="[chiiki-dx.net] 自動投稿エラー: $TITLE"
+  cat > /tmp/wp_notify.php << NOTIFYEOF
+<?php
+wp_mail(
+  '$NOTIFY_EMAIL',
+  '[chiiki-dx.net] 自動投稿エラー: $TITLE',
+  "エラーが発生しました。\n\n詳細: $MESSAGE\n\nファイル: $MD_FILE\n\n確認してください。\nhttps://chiiki-dx.net/wp-admin/edit.php"
+);
+echo 'mail sent';
+NOTIFYEOF
+  scp -q /tmp/wp_notify.php sakura-chiiki:/tmp/wp_notify.php 2>/dev/null
+  ssh sakura-chiiki "$WP_CLI eval-file /tmp/wp_notify.php; rm /tmp/wp_notify.php" 2>/dev/null
+  rm -f /tmp/wp_notify.php
+}
 
 if [ -z "$MD_FILE" ]; then
   echo "使い方: bash scripts/post-to-wp.sh [記事ファイルパス]"
@@ -43,6 +62,7 @@ python3 "$SCRIPT_DIR/md_to_gutenberg.py" "$MD_FILE" > "$GUTENBERG_FILE"
 if [ ! -s "$GUTENBERG_FILE" ]; then
   echo "エラー: Gutenberg変換に失敗しました"
   rm "$GUTENBERG_FILE"
+  notify_error "Gutenberg変換に失敗しました"
   exit 1
 fi
 
@@ -56,6 +76,7 @@ POST_ID=$(ssh sakura-chiiki "$WP_CLI post create \
 if [ -z "$POST_ID" ]; then
   echo "エラー: 投稿に失敗しました"
   rm "$GUTENBERG_FILE"
+  notify_error "WP-CLI post create に失敗しました（SSH接続またはWP-CLIのエラーの可能性）"
   exit 1
 fi
 
