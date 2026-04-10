@@ -76,11 +76,11 @@ content = re.sub(r"^(status: wp-posted)", rf"\1\nwp_post_id: {post_id}", content
 open(path, "w", encoding="utf-8").write(content)
 PYEOF
 
-# git commit & push
+# git commit & push（CCR環境ではgit失敗しても続行）
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_DIR"
 git add "$MD_FILE"
-git commit -m "WP投稿完了: $TITLE (ID: $POST_ID)"
-git push
+git commit -m "WP投稿完了: $TITLE (ID: $POST_ID)" || true
+git push || true
 
 echo "✅ 完了!"
