@@ -51,11 +51,12 @@ if [ -z "$POST_ID" ] || echo "$POST_ID" | grep -q "^ERROR"; then
   echo "エラー: WP REST API 投稿失敗"
   cat /tmp/wp_api_error.log >&2
 
-  # エラーメール通知 (curl)
+  # エラーをWP下書きとして記録
+  ERR_BODY=$(cat /tmp/wp_api_error.log 2>/dev/null | head -5 | tr '"' "'" | tr '\n' ' ')
   curl -s -X POST "${WP_URL}/wp-json/wp/v2/posts" \
     -u "${WP_USER}:${WP_APP_PASS}" \
     -H "Content-Type: application/json" \
-    -d "{\"title\":\"[自動投稿エラー] ${TITLE}\",\"content\":\"エラー: $(cat /tmp/wp_api_error.log | tr '\"' \"'\")\",\"status\":\"draft\"}" \
+    -d "{\"title\":\"[自動投稿エラー] ${TITLE}\",\"content\":\"${ERR_BODY}\",\"status\":\"draft\"}" \
     > /dev/null 2>&1 || true
 
   exit 1
