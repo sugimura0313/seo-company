@@ -7,11 +7,21 @@ WordPress REST API 投稿ヘルパー
 import sys
 import json
 import os
+import ssl
 import base64
 import re
 import urllib.request
 import urllib.parse
 import urllib.error
+
+
+def _ssl_context():
+    """certifi があれば使い、なければシステム証明書で SSL コンテキストを作る"""
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        return ssl.create_default_context()
 
 
 def auth_headers(user, password):
@@ -24,14 +34,14 @@ def auth_headers(user, password):
 
 def api_get(url, headers):
     req = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, context=_ssl_context()) as resp:
         return json.load(resp)
 
 
 def api_post(url, headers, payload):
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=data, headers=headers, method="POST")
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, context=_ssl_context()) as resp:
         return json.load(resp)
 
 
