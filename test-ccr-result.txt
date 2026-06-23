@@ -1,4 +1,24 @@
 === CCR診断
-Mon Jun 22 18:01:37 UTC 2026
+Tue Jun 23 18:01:30 UTC 2026
 Python 3.11.15
-WP HTTP: 403
+WP HTTP: 000* Uses proxy env variable no_proxy == 'localhost,127.0.0.1,::1,127.0.0.0/8,0.0.0.0/8,::,169.254.0.0/16,anthropic.com,.anthropic.com,*.anthropic.com,registry.npmjs.org,jsr.io,npm.jsr.io,pypi.org,files.pythonhosted.org,index.crates.io,proxy.golang.org,host.docker.internal,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,.svc.cluster.local,*.svc.cluster.local'
+* Uses proxy env variable https_proxy == 'http://127.0.0.1:41235'
+*   Trying 127.0.0.1:41235...
+* Connected to 127.0.0.1 (127.0.0.1) port 41235
+* CONNECT tunnel: HTTP/1.1 negotiated
+* allocate connect buffer
+* Server auth using Basic with user 'sugi274h'
+* Establish HTTP proxy tunnel to chiiki-dx.net:443
+> CONNECT chiiki-dx.net:443 HTTP/1.1
+> Host: chiiki-dx.net:443
+> User-Agent: curl/8.5.0
+> Proxy-Connection: Keep-Alive
+> 
+< HTTP/1.1 403 Forbidden
+< Content-Length: 36
+< 
+* CONNECT tunnel failed, response 403
+* Closing connection
+
+WP HTTP: 000
+curl exit: 56
