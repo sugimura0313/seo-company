@@ -1,6 +1,4 @@
 === CCR診断
-Wed Jun 24 18:01:20 UTC 2026
+Thu Jun 25 18:01:24 UTC 2026
 Python 3.11.15
-WP HTTP: 000
-curl exit code: 56 (network/proxy error - WP unreachable from CCR)
-proxy: HTTP/1.1 403 Forbidden from chiiki-dx.net:443 via 127.0.0.1:41235
+WP HTTP: 000WP HTTP: CURL ERROR (exit 56 - network)
