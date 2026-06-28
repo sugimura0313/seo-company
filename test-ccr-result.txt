@@ -1,5 +1,5 @@
 === CCR診断
-Sat Jun 27 18:01:38 UTC 2026
+Sun Jun 28 18:01:26 UTC 2026
 Python 3.11.15
+WP HTTP: 000curl exit: 0
 WP HTTP: 000
-WP API curl exit code: 56 (network error)
