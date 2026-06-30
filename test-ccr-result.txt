@@ -1,4 +1,5 @@
 === CCR診断
-Mon Jun 29 18:01:42 UTC 2026
+Tue Jun 30 18:01:36 UTC 2026
 Python 3.11.15
-WP HTTP: 000 (PROXY BLOCKED - chiiki-dx.net denied by network policy)
+WP HTTP: 000
+curl exit code: 56 (network error)
